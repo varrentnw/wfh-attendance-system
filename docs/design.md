@@ -95,23 +95,114 @@ Decisions:
 - There are no `created_at` or `updated_at` columns. Attendance records are immutable (HRD has view-only access), so `updated_at` would never change, and `checked_in_at` already records when the row was created.
 
 ## Cross-service rules
-
-- When an employee leaves, HRD sets `employment_status` to `INACTIVE` in the employee service. The employee service must then tell the auth service to set `is_active = FALSE`. Their attendance records are kept unchanged.
-- Adding a new employee requires two writes in two services: the employee record, then its credential. There is no shared transaction, so the design must handle the case where the second write fails. This will be addressed in the API design.
-- The admin attendance view shows employee names, but the attendance service stores only `employee_id`. Some part of the system has to combine the two. This will be addressed in the API design.
-
-## API design
-- Gateway composition is used to show the employee names with the attendance records. In the event the employee service is down or times out, a partial result will be returned with a warning.
-
+ 
+The frontend always sends one request to the gateway. When an operation involves more than one service, the gateway orchestrates the internal calls.
+ 
+- **Creating an employee (compensating action).** The gateway first validates everything it can, including whether the username and email are free. It then creates the employee record, then the credential. If creating the credential fails, the gateway deletes the employee record it just created and returns a single error, so HRD can retry cleanly. This internal delete is not part of the external API, which has no delete endpoint. If the compensating delete itself fails, the failure is logged.
+- **Deactivating an employee (fail closed).** The gateway first sets `is_active = FALSE` in the auth service, then sets `employment_status = 'INACTIVE'` in the employee service. If the second step fails, access stays revoked and HRD gets an error to retry. Access is never re-enabled as compensation. Both steps are idempotent, so retrying is safe. Attendance records are kept unchanged.
+- **Showing names with attendance (API composition).** The attendance service stores only `employee_id`. For HRD's attendance view, the gateway fetches the records, fetches the matching employees from the employee service, and merges them into one response.
+- **Graceful degradation.** If the employee service fails or does not respond within 2 seconds, the gateway still returns the attendance records with `"employee": null` and a top-level warning. The status stays `200`.
+- **Filtering attendance by department.** The gateway first asks the employee service for the IDs of employees in that department, then queries the attendance service for those IDs.
+## API contract (external, frontend to gateway)
+ 
+All paths are relative to the gateway. Every endpoint except login requires `Authorization: Bearer <token>`. JSON fields and query parameters use camelCase. Database columns use snake_case.
+ 
+Errors use a single shape everywhere:
+ 
+```json
+{ "statusCode": 409, "message": "Already checked in today" }
+```
+ 
+Lists use a single shape everywhere:
+ 
+```json
+{ "items": [], "page": 1, "pageSize": 20, "total": 0 }
+```
+ 
+### Auth
+ 
+```
+POST /auth/login                     public
+  Body:  { "username", "password" }
+  200 →  { "accessToken", "expiresIn", "employeeId", "role" }
+  401 →  "Invalid username or password" (same message for every failure,
+         to prevent user enumeration; also returned for deactivated accounts)
+```
+ 
+### Employees (HRD_ADMIN only)
+ 
+```
+GET   /employees?search=&department=&status=&page=&pageSize=
+  200 →  list of employees
+ 
+GET   /employees/:id
+  200 →  one employee
+  404 →  no such employee
+ 
+POST  /employees
+  Body:  { "name", "email", "department", "position", "username", "password" }
+  201 →  the created employee (never the password or its hash)
+  400 →  invalid or missing fields
+  409 →  email or username already taken
+ 
+PATCH /employees/:id
+  Body:  any subset of { "name", "email", "department", "position", "employmentStatus" }
+  200 →  the updated employee
+  400 →  invalid fields
+  404 →  no such employee
+  409 →  email already taken
+```
+ 
+### Attendance
+ 
+```
+POST  /attendance-records                     EMPLOYEE
+  Body:  multipart/form-data, field "photo" (JPEG or PNG, max 5 MB)
+  Server derives: employee_id (token), checked_in_at (server clock, UTC),
+                  work_date (checked_in_at in WIB), photo storage path
+  201 →  { "recordId", "checkedInAt", "workDate", "photoUrl" }
+  400 →  missing photo or wrong file type
+  403 →  caller is not allowed to check in
+  409 →  already checked in for this work_date
+  413 →  photo too large
+ 
+GET   /me/attendance-records/today            EMPLOYEE
+  200 →  today's record
+  404 →  not checked in today
+ 
+GET   /attendance-records?employeeId=&department=&from=&to=&page=&pageSize=   HRD_ADMIN
+  from and to are dates (inclusive), interpreted as work dates
+  200 →  list of records, each with an "employee" object
+         ({ "employeeId", "name", "department" }, or null if unavailable)
+ 
+GET   /attendance-records/:id/photo           HRD_ADMIN
+  200 →  the image file
+  404 →  no such record
+```
+ 
+Every endpoint can also return `401` for a missing or invalid token and `403` for a role that is not allowed.
+ 
+## Security notes
+ 
+- Passwords are hashed with bcrypt and never returned by any endpoint.
+- Access tokens expire after 1 hour. Known limitation: a token issued before deactivation stays valid until it expires. The full fix would be for the gateway to check `is_active` on every request.
+- The client never supplies identity, timestamps, dates, or file paths. The server derives all of them.
+## Open items
+ 
+- Browsers do not send the `Authorization` header for a plain `<img src="...">`, so the photo endpoint needs a decision on how the frontend loads images. To be settled when building the frontend.
 ## Assumptions
-
+ 
 - "Today" for attendance purposes is defined by WIB (UTC+7), the company's headquarters time zone.
 - Times in the frontend are displayed in the viewer's browser time zone.
 - HRD admins are employees and have records in the `employees` table.
+- Each employee has one login with one role. HRD_ADMIN accounts are for administration and do not check in.
 - One check-in per employee per day. The brief does not require check-out.
-
+- Employees cannot view their attendance history, only today's status. The brief does not require history.
 ## Future improvements
-
+ 
 - A `departments` table, so free-text values such as "IT" and "I.T." cannot both exist.
 - UUIDs as primary keys, so IDs can be generated anywhere and cannot be guessed by counting.
 - Support for employees in WITA and WIT, with `work_date` computed in each employee's own time zone.
+- Rate limiting on login, to slow down password-guessing attacks.
+- Keeping a local copy of employee names in the attendance service, if read volume ever made API composition too slow. The cost is eventual consistency.
+ 
