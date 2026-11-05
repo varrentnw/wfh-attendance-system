@@ -100,6 +100,9 @@ Decisions:
 - Adding a new employee requires two writes in two services: the employee record, then its credential. There is no shared transaction, so the design must handle the case where the second write fails. This will be addressed in the API design.
 - The admin attendance view shows employee names, but the attendance service stores only `employee_id`. Some part of the system has to combine the two. This will be addressed in the API design.
 
+## API design
+- Gateway composition is used to show the employee names with the attendance records. In the event the employee service is down or times out, a partial result will be returned with a warning.
+
 ## Assumptions
 
 - "Today" for attendance purposes is defined by WIB (UTC+7), the company's headquarters time zone.
