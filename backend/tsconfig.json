@@ -1,0 +1,52 @@
+{
+  "compilerOptions": {
+    "module": "nodenext",
+    "moduleResolution": "nodenext",
+    "resolvePackageJsonExports": true,
+    "esModuleInterop": true,
+    "isolatedModules": true,
+    "declaration": true,
+    "removeComments": true,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "allowSyntheticDefaultImports": true,
+    "target": "ES2023",
+    "types": [
+      "node",
+      "jest"
+    ],
+    "sourceMap": true,
+    "outDir": "./dist",
+    "rootDir": ".",
+    "incremental": true,
+    "skipLibCheck": true,
+    "strict": true,
+    "strictPropertyInitialization": false,
+    "paths": {
+      "@app/common": [
+        "./libs/common/src"
+      ],
+      "@app/common/*": [
+        "./libs/common/src/*"
+      ]
+    }
+  },
+  "files": [],
+  "references": [
+    {
+      "path": "./apps/backend/tsconfig.app.json"
+    },
+    {
+      "path": "./apps/gateway/tsconfig.app.json"
+    },
+    {
+      "path": "./apps/auth/tsconfig.app.json"
+    },
+    {
+      "path": "./apps/employee/tsconfig.app.json"
+    },
+    {
+      "path": "./apps/attendance/tsconfig.app.json"
+    }
+  ]
+}
