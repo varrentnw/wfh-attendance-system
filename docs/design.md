@@ -38,8 +38,8 @@ CREATE TABLE credentials (
   password_hash  VARCHAR(255)                   NOT NULL,
   role           ENUM('EMPLOYEE', 'HRD_ADMIN')  NOT NULL DEFAULT 'EMPLOYEE',
   is_active      BOOLEAN                        NOT NULL DEFAULT TRUE,
-  created_at     DATETIME                       NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  updated_at     DATETIME                       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  created_at     DATETIME(6)                    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at     DATETIME(6)                    NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (credential_id),
   UNIQUE KEY uq_credentials_username (username),
   UNIQUE KEY uq_credentials_employee (employee_id)
@@ -62,8 +62,8 @@ CREATE TABLE employees (
   department         VARCHAR(100)                 NOT NULL,
   position           VARCHAR(100)                 NOT NULL,
   employment_status  ENUM('ACTIVE', 'INACTIVE')   NOT NULL DEFAULT 'ACTIVE',
-  created_at         DATETIME                     NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  updated_at         DATETIME                     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  created_at         DATETIME(6)                  NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at         DATETIME(6)                  NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (employee_id),
   UNIQUE KEY uq_employees_email (email)
 );
