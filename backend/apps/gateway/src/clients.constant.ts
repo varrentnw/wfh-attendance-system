@@ -1,1 +1,2 @@
 export const EMPLOYEE_SERVICE = 'EMPLOYEE_SERVICE';
+export const AUTH_SERVICE = 'AUTH_SERVICE';

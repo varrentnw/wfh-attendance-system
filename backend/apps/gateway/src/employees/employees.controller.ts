@@ -6,7 +6,10 @@ import { EMPLOYEE_PATTERNS } from '@app/common';
 import { CreateEmployeeDto } from './dto/create-employee.dto';
 import { ListEmployeesQueryDto } from './dto/list-employees-query.dto';
 import { UpdateEmployeeDto } from './dto/update-employee.dto';
+import { Role } from '@app/common';
+import { Roles } from '../auth/auth.decorator';
 
+@Roles(Role.HRD_ADMIN)
 @Controller('employees')
 export class EmployeesController {
   constructor(@Inject(EMPLOYEE_SERVICE) private readonly employeeClient: ClientProxy) {}
