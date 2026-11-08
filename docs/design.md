@@ -118,6 +118,8 @@ Lists use a single shape everywhere:
 ```json
 { "items": [], "page": 1, "pageSize": 20, "total": 0 }
 ```
+
+Validation errors (400) return message as an array of strings, and all other errors return a single string.
  
 ### Auth
  
@@ -132,7 +134,7 @@ POST /auth/login                     public
 ### Employees (HRD_ADMIN only)
  
 ```
-GET   /employees?search=&department=&status=&page=&pageSize=
+GET   /employees?search=&department=&employmentStatus=&page=&pageSize=
   200 →  list of employees
  
 GET   /employees/:id
