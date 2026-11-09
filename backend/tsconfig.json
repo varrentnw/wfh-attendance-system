@@ -13,7 +13,8 @@
     "target": "ES2023",
     "types": [
       "node",
-      "jest"
+      "jest",
+      "multer",
     ],
     "sourceMap": true,
     "outDir": "./dist",

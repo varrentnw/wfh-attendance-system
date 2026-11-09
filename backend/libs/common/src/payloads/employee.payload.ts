@@ -25,3 +25,7 @@ export interface UpdateEmployeePayload {
     employmentStatus?: EmploymentStatus;
   };
 }
+
+export interface FindEmployeesByIdsPayload {
+  employeeIds: number[];
+}

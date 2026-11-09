@@ -94,10 +94,9 @@ export class EmployeesService {
       throw error;
     }
     return {
-        ...newEmployee,
-        username,
-        role: Role.EMPLOYEE,
-
+      ...newEmployee,
+      username,
+      role: Role.EMPLOYEE,
     };
   }
 

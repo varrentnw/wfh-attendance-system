@@ -7,3 +7,6 @@ export * from './enums/role.enum';
 export * from './patterns/auth.patterns';
 export * from './payloads/auth.payload';
 export * from './interfaces/employee-view.interface';
+export * from './payloads/attendance.payload';
+export * from './interfaces/attendance-records-view.interface';
+export * from './patterns/attendance.patterns';

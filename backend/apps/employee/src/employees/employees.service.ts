@@ -1,10 +1,16 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { QueryFailedError, Repository, FindOptionsWhere, Like } from 'typeorm';
+import {
+  QueryFailedError,
+  Repository,
+  FindOptionsWhere,
+  Like,
+  In,
+} from 'typeorm';
 import { Employee } from './employee.entity';
 import {
   CreateEmployeePayload,
-  FindEmployeePayload,
+  FindEmployeesByIdsPayload,
   FindEmployeesPayload,
   PaginatedResult,
   UpdateEmployeePayload,
@@ -94,6 +100,11 @@ export class EmployeesService {
   async remove(employeeId: number): Promise<{ employeeId: number }> {
     await this.employeesRepository.delete({ employeeId });
     return { employeeId };
+  }
+
+  findByIds({ employeeIds }: FindEmployeesByIdsPayload): Promise<Employee[]> {
+    if (employeeIds.length === 0) return Promise.resolve([]);
+    return this.employeesRepository.findBy({ employeeId: In(employeeIds) });
   }
 
   private isDuplicateEntry(error: unknown, constraint: string): boolean {

@@ -4,7 +4,7 @@ import {
   Transport,
   ClientsModule,
 } from '@nestjs/microservices';
-import { AUTH_SERVICE, EMPLOYEE_SERVICE } from '../clients.constant';
+import { ATTENDANCE_SERVICE, AUTH_SERVICE, EMPLOYEE_SERVICE } from '../clients.constant';
 import { Module } from '@nestjs/common';
 
 function tcpClient(name: string, prefix: string): ClientsProviderAsyncOptions {
@@ -26,6 +26,7 @@ function tcpClient(name: string, prefix: string): ClientsProviderAsyncOptions {
     ClientsModule.registerAsync([
       tcpClient(AUTH_SERVICE, 'AUTH'),
       tcpClient(EMPLOYEE_SERVICE, 'EMPLOYEE'),
+      tcpClient(ATTENDANCE_SERVICE, 'ATTENDANCE'),
     ]),
   ],
   exports: [ClientsModule],
