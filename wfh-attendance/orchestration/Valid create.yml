@@ -1,0 +1,27 @@
+info:
+  name: Valid create
+  type: http
+  seq: 1
+
+http:
+  method: POST
+  url: "{{baseUrl}}/employees"
+  body:
+    type: json
+    data: |-
+      {
+        "name": "Dewi Lestari",
+        "email": "dewi.lestari@example.com",
+        "department": "Marketing",
+        "position": "Marketing Specialist",
+        "username": "dewi.lestari",
+        "password": "Dewi#2026"
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

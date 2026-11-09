@@ -1,0 +1,27 @@
+info:
+  name: Fault injection
+  type: http
+  seq: 4
+
+http:
+  method: POST
+  url: "{{baseUrl}}/employees"
+  body:
+    type: json
+    data: |-
+      {
+        "name": "Agus Pratama",
+        "email": "agus.pratama@example.com",
+        "department": "Operations",
+        "position": "Operations Staff",
+        "username": "agus.pratama",
+        "password": "Agus#2026"
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

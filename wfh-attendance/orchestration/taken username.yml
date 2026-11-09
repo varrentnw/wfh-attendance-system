@@ -1,0 +1,27 @@
+info:
+  name: taken username
+  type: http
+  seq: 2
+
+http:
+  method: POST
+  url: "{{baseUrl}}/employees"
+  body:
+    type: json
+    data: |-
+      {
+        "name": "Rina Wijaya",
+        "email": "rina.wijaya@example.com",
+        "department": "Finance",
+        "position": "Accountant",
+        "username": "dewi.lestari",
+        "password": "Rina#2026"
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

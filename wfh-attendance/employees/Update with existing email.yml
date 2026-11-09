@@ -1,0 +1,19 @@
+info:
+  name: Update with existing email
+  type: http
+  seq: 11
+
+http:
+  method: PATCH
+  url: "{{baseUrl}}/employees/1"
+  body:
+    type: json
+    data: '{ "position": "Senior Engineer" }'
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

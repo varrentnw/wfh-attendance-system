@@ -1,25 +1,11 @@
 import { Module } from '@nestjs/common';
 import { EmployeesController } from './employees.controller';
-import { ClientsModule, Transport } from '@nestjs/microservices';
-import { EMPLOYEE_SERVICE } from '../clients.constant';
-import { ConfigService } from '@nestjs/config';
+import { ServiceClientsModule } from '../clients/service-clients.module';
+import { EmployeesService } from './employees.service';
 
 @Module({
-  imports: [
-    ClientsModule.registerAsync([
-      {
-        name: EMPLOYEE_SERVICE,
-        inject: [ConfigService],
-        useFactory: (config: ConfigService) => ({
-          transport: Transport.TCP,
-          options: {
-            host: config.getOrThrow<string>('EMPLOYEE_SERVICE_HOST'),
-            port: Number(config.getOrThrow<string>('EMPLOYEE_SERVICE_PORT')),
-          },
-        }),
-      },
-    ]),
-  ],
+  imports: [ServiceClientsModule],
   controllers: [EmployeesController],
+  providers: [EmployeesService],
 })
 export class EmployeesModule {}

@@ -9,10 +9,10 @@ async function bootstrap() {
 
   app.connectMicroservice<MicroserviceOptions>({
     transport: Transport.TCP,
-    options:{
+    options: {
       host: 'localhost',
       port: Number(config.getOrThrow<string>('AUTH_SERVICE_PORT')),
-    }
+    },
   });
 
   await app.startAllMicroservices();

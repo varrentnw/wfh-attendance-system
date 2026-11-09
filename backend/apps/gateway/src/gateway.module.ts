@@ -14,16 +14,18 @@ import { RolesGuard } from './auth/roles.guard';
       envFilePath: '../.env',
     }),
     JwtModule.registerAsync({
-    global: true,
-    inject: [ConfigService],
-    useFactory: (config: ConfigService) => ({ secret: config.getOrThrow<string>('JWT_SECRET') }),
+      global: true,
+      inject: [ConfigService],
+      useFactory: (config: ConfigService) => ({
+        secret: config.getOrThrow<string>('JWT_SECRET'),
+      }),
     }),
     EmployeesModule,
     AuthModule,
   ],
   providers: [
-    { provide: APP_GUARD, useClass: JwtAuthGuard },   // runs first: who are you?
-    { provide: APP_GUARD, useClass: RolesGuard },     // runs second: are you allowed?
+    { provide: APP_GUARD, useClass: JwtAuthGuard }, // runs first: who are you?
+    { provide: APP_GUARD, useClass: RolesGuard }, // runs second: are you allowed?
   ],
 })
 export class GatewayModule {}

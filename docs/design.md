@@ -200,6 +200,7 @@ Every endpoint can also return `401` for a missing or invalid token and `403` fo
 - Each employee has one login with one role. HRD_ADMIN accounts are for administration and do not check in.
 - One check-in per employee per day. The brief does not require check-out.
 - Employees cannot view their attendance history, only today's status. The brief does not require history.
+- Employees created through the API always receive the EMPLOYEE role; HRD admin accounts are created by the seed script.
 ## Future improvements
  
 - A `departments` table, so free-text values such as "IT" and "I.T." cannot both exist.

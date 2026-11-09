@@ -6,3 +6,4 @@ export * from './interfaces/pagination.interface';
 export * from './enums/role.enum';
 export * from './patterns/auth.patterns';
 export * from './payloads/auth.payload';
+export * from './interfaces/employee-view.interface';

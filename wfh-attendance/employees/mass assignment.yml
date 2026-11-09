@@ -1,0 +1,26 @@
+info:
+  name: mass assignment
+  type: http
+  seq: 5
+
+http:
+  method: POST
+  url: "{{baseUrl}}/employees"
+  body:
+    type: json
+    data: |-
+      {
+        "name": "Siti Rahayu",
+        "email": "siti.rahayu@example.com",
+        "department": "Finance",
+        "position": "Accountant",
+        "employmentStatus": "INACTIVE"
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false
