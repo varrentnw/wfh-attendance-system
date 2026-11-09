@@ -1,8 +1,20 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { QueryFailedError, Repository, FindOptionsWhere, Like } from 'typeorm';
+import {
+  QueryFailedError,
+  Repository,
+  FindOptionsWhere,
+  Like,
+  In,
+} from 'typeorm';
 import { Employee } from './employee.entity';
-import { CreateEmployeePayload, FindEmployeePayload, FindEmployeesPayload, PaginatedResult, UpdateEmployeePayload } from '@app/common';
+import {
+  CreateEmployeePayload,
+  FindEmployeesByIdsPayload,
+  FindEmployeesPayload,
+  PaginatedResult,
+  UpdateEmployeePayload,
+} from '@app/common';
 import { RpcException } from '@nestjs/microservices';
 
 @Injectable()
@@ -14,16 +26,23 @@ export class EmployeesService {
 
   async create(payload: CreateEmployeePayload): Promise<Employee> {
     try {
-      return await this.employeesRepository.save(this.employeesRepository.create(payload));
+      return await this.employeesRepository.save(
+        this.employeesRepository.create(payload),
+      );
     } catch (error) {
       if (this.isDuplicateEntry(error, 'uq_employees_email')) {
-        throw new RpcException({ statusCode: 409, message: 'Email already exists' });
+        throw new RpcException({
+          statusCode: 409,
+          message: 'Email already exists',
+        });
       }
       throw error;
     }
   }
 
-  async findAll(query: FindEmployeesPayload): Promise<PaginatedResult<Employee>> {
+  async findAll(
+    query: FindEmployeesPayload,
+  ): Promise<PaginatedResult<Employee>> {
     const { search, department, employmentStatus, page, pageSize } = query;
 
     const base: FindOptionsWhere<Employee> = {};
@@ -51,22 +70,41 @@ export class EmployeesService {
   async findOne(employeeId: number): Promise<Employee> {
     const employee = await this.employeesRepository.findOneBy({ employeeId });
     if (!employee) {
-      throw new RpcException({ statusCode: 404, message: 'Employee not found' });
+      throw new RpcException({
+        statusCode: 404,
+        message: 'Employee not found',
+      });
     }
     return employee;
   }
 
-  async update({ employeeId, changes }: UpdateEmployeePayload): Promise<Employee> {
-    const employee = await this.findOne(employeeId);   // throws the 404 if missing
+  async update({
+    employeeId,
+    changes,
+  }: UpdateEmployeePayload): Promise<Employee> {
+    const employee = await this.findOne(employeeId); // throws the 404 if missing
     this.employeesRepository.merge(employee, changes);
     try {
       return await this.employeesRepository.save(employee);
     } catch (error) {
       if (this.isDuplicateEntry(error, 'uq_employees_email')) {
-        throw new RpcException({ statusCode: 409, message: 'Email already exists' });
+        throw new RpcException({
+          statusCode: 409,
+          message: 'Email already exists',
+        });
       }
       throw error;
     }
+  }
+
+  async remove(employeeId: number): Promise<{ employeeId: number }> {
+    await this.employeesRepository.delete({ employeeId });
+    return { employeeId };
+  }
+
+  findByIds({ employeeIds }: FindEmployeesByIdsPayload): Promise<Employee[]> {
+    if (employeeIds.length === 0) return Promise.resolve([]);
+    return this.employeesRepository.findBy({ employeeId: In(employeeIds) });
   }
 
   private isDuplicateEntry(error: unknown, constraint: string): boolean {

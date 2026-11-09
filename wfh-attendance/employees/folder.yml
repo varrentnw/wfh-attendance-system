@@ -1,0 +1,7 @@
+info:
+  name: employees
+  type: folder
+  seq: 1
+
+request:
+  auth: inherit

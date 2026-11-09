@@ -1,7 +1,13 @@
 import { Controller } from '@nestjs/common';
 import { EmployeesService } from './employees.service';
 import { EMPLOYEE_PATTERNS } from '@app/common';
-import type { CreateEmployeePayload, FindEmployeePayload, FindEmployeesPayload, UpdateEmployeePayload} from '@app/common';
+import type {
+  CreateEmployeePayload,
+  FindEmployeePayload,
+  FindEmployeesByIdsPayload,
+  FindEmployeesPayload,
+  UpdateEmployeePayload,
+} from '@app/common';
 import { MessagePattern, Payload } from '@nestjs/microservices';
 
 @Controller()
@@ -26,5 +32,15 @@ export class EmployeesController {
   @MessagePattern(EMPLOYEE_PATTERNS.UPDATE)
   update(@Payload() payload: UpdateEmployeePayload) {
     return this.employeesService.update(payload);
+  }
+
+  @MessagePattern(EMPLOYEE_PATTERNS.REMOVE)
+  remove(@Payload() { employeeId }: FindEmployeePayload) {
+    return this.employeesService.remove(employeeId);
+  }
+
+  @MessagePattern(EMPLOYEE_PATTERNS.FIND_BY_IDS)
+  findByIds(@Payload() { employeeIds }: FindEmployeesByIdsPayload) {
+    return this.employeesService.findByIds({ employeeIds });
   }
 }

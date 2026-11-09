@@ -1,4 +1,4 @@
-import { EmploymentStatus } from "../enums/employment-status.enum";
+import { EmploymentStatus } from '../enums/employment-status.enum';
 
 export interface CreateEmployeePayload {
   name: string;
@@ -21,5 +21,11 @@ export interface FindEmployeePayload {
 
 export interface UpdateEmployeePayload {
   employeeId: number;
-  changes: Partial<CreateEmployeePayload> & { employmentStatus?: EmploymentStatus };
+  changes: Partial<CreateEmployeePayload> & {
+    employmentStatus?: EmploymentStatus;
+  };
+}
+
+export interface FindEmployeesByIdsPayload {
+  employeeIds: number[];
 }

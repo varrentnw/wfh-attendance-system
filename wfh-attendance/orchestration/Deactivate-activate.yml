@@ -1,0 +1,27 @@
+info:
+  name: Deactivate/activate
+  type: http
+  seq: 7
+
+http:
+  method: PATCH
+  url: "{{baseUrl}}/employees/14"
+  body:
+    type: json
+    data: |-
+      {
+        "employmentStatus": "INACTIVE"
+      }
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: after-response
+      code: bru.setVar("employeeToken", res.body.accessToken);
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false
