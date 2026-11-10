@@ -1,22 +1,23 @@
 import ErrorMessages from '../components/ErrorMessages';
 import { useState } from 'react';
 import type { SubmitEvent } from 'react';
-import { login } from '../api/auth';
 import { ApiError } from '../api/client';
+import { useAuth } from '../auth/AuthContext';
+import { Navigate } from 'react-router';
 
 function LoginPage() {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [errorMessages, setErrorMessages] = useState<string[]>([]);
+    const { session, login } = useAuth();
 
     async function handleLogin(event: SubmitEvent<HTMLFormElement>) {
         event.preventDefault();
         setIsSubmitting(true);
         setErrorMessages([]);
         try {
-            const loginResult = await login(username, password);
-            console.log(loginResult);
+            await login(username, password);
         } catch (error) {
             if (error instanceof ApiError) {
                 setErrorMessages(error.messages);
@@ -28,6 +29,11 @@ function LoginPage() {
         }
     }
 
+    if (session !== null) {
+        return (
+            <Navigate to="/" replace/>
+        )
+    }
     return (
         <form onSubmit={handleLogin}>
             <label htmlFor="username">Username</label>
@@ -36,7 +42,7 @@ function LoginPage() {
             <label htmlFor="password">Password</label>
             <input id="password" type="password" autoComplete="current-password" value={password} onChange={(event) => setPassword(event.target.value)} />
 
-           <ErrorMessages messages={errorMessages} />
+            <ErrorMessages messages={errorMessages} />
            
            <button type="submit" disabled={isSubmitting}>
             {isSubmitting ? 'Logging in...' : 'Login'}
