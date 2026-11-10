@@ -1,5 +1,14 @@
-import { Role} from '@app/common';
-import { Controller, Get, Param, ParseIntPipe, Post, Query, UploadedFile, UseInterceptors } from '@nestjs/common';
+import { Role } from '@app/common';
+import {
+  Controller,
+  Get,
+  Param,
+  ParseIntPipe,
+  Post,
+  Query,
+  UploadedFile,
+  UseInterceptors,
+} from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { Roles, CurrentUser } from '../auth/auth.decorator';
 import { AttendanceService } from './attendance.service';
@@ -12,8 +21,13 @@ export class AttendanceRecordsController {
 
   @Roles(Role.EMPLOYEE)
   @Post()
-  @UseInterceptors(FileInterceptor('photo', { limits: { fileSize: 5 * 1024 * 1024 } }))
-  checkIn(@CurrentUser() user: JwtPayload, @UploadedFile() photo: Express.Multer.File | undefined) {
+  @UseInterceptors(
+    FileInterceptor('photo', { limits: { fileSize: 5 * 1024 * 1024 } }),
+  )
+  checkIn(
+    @CurrentUser() user: JwtPayload,
+    @UploadedFile() photo: Express.Multer.File | undefined,
+  ) {
     return this.attendanceService.checkIn(user.sub, photo);
   }
 

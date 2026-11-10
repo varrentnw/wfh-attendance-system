@@ -2,6 +2,7 @@ import { NestFactory } from '@nestjs/core';
 import { GatewayModule } from './gateway.module';
 import { ValidationPipe } from '@nestjs/common';
 import { RpcToHttpExceptionFilter } from './filters/rpc-to-http-exception.filters';
+import { ConfigService } from '@nestjs/config';
 
 async function bootstrap() {
   const app = await NestFactory.create(GatewayModule);
@@ -13,6 +14,9 @@ async function bootstrap() {
     }),
   );
   app.useGlobalFilters(new RpcToHttpExceptionFilter());
+  app.enableCors({
+    origin: app.get(ConfigService).getOrThrow<string>('CORS_ORIGIN'),
+  });
   await app.listen(process.env.port ?? 3000);
 }
 bootstrap();
