@@ -1,6 +1,7 @@
 import { Navigate, Route, Routes } from 'react-router';
 import HomeRedirect from './auth/HomeRedirect';
 import RequireRole from './auth/RequireRole';
+import AppLayout from './components/AppLayout';
 import CheckInPage from './pages/CheckInPage';
 import EmployeesPage from './pages/EmployeesPage';
 import LoginPage from './pages/LoginPage';
@@ -14,20 +15,22 @@ function App() {
       {/* "/" has no page; it sends each user to their home. */}
       <Route path="/" element={<HomeRedirect />} />
 
-      {/* Guarded: the guard has no path. It wraps the routes inside it,
-          and they render where the guard puts its <Outlet />. */}
+      {/* Guarded: the guard decides first, then the layout frames the page.
+          Routes without a path only wrap the routes inside them. */}
       <Route element={<RequireRole role="EMPLOYEE" />}>
-        <Route path="/check-in" element={<CheckInPage />} />
+        <Route element={<AppLayout />}>
+          <Route path="/check-in" element={<CheckInPage />} />
+        </Route>
       </Route>
 
-      {/* TODO 1: the same block for HRD_ADMIN, with /employees → EmployeesPage. */}
       <Route element={<RequireRole role="HRD_ADMIN" />}>
-        <Route path="/employees" element={<EmployeesPage />} />
+        <Route element={<AppLayout />}>
+          <Route path="/employees" element={<EmployeesPage />} />
+        </Route>
       </Route>
 
-      {/* TODO 2: any other URL → redirect to "/".
-          A Route with path="*" whose element is a <Navigate>. */}
-      <Route path="*" element={<Navigate to='/' replace/>}/>
+      {/* Any other URL goes home. */}
+      <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
 }
