@@ -1,4 +1,8 @@
-import { createParamDecorator, ExecutionContext, SetMetadata } from '@nestjs/common';
+import {
+  createParamDecorator,
+  ExecutionContext,
+  SetMetadata,
+} from '@nestjs/common';
 import { JwtPayload, Role } from '@app/common';
 import { AuthenticatedRequest } from './authenticated-request';
 
