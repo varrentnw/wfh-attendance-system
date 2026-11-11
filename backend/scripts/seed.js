@@ -6,13 +6,20 @@
  * written through the MySQL user of the service that owns the table.
  *
  * Safe to run more than once: a username that already exists is skipped.
- * Run the services once before this script, because they create the tables in development.
+ * The services create the tables when they first start, so the script waits for the tables
+ * for a while before it gives up.
  */
+const fs = require('node:fs');
 const path = require('node:path');
 const bcrypt = require('bcryptjs');
 const mysql = require('mysql2/promise');
 
-process.loadEnvFile(path.resolve(__dirname, '../../.env'));
+// Locally the settings come from the root .env file. In a container there is no file:
+// Compose passes the same settings as environment variables.
+const envFile = path.resolve(__dirname, '../../.env');
+if (fs.existsSync(envFile)) {
+  process.loadEnvFile(envFile);
+}
 
 const BCRYPT_COST = 12; // the same cost factor the auth service uses
 
@@ -109,22 +116,55 @@ async function seedUser(authDb, employeeDb, user) {
   console.log(`created  ${user.username} (${user.role}, employee ${employeeId})`);
 }
 
-async function main() {
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+// Not ready yet: MySQL is still starting, or a service has not created its table.
+const NOT_READY_CODES = [
+  'ER_NO_SUCH_TABLE',
+  'ECONNREFUSED',
+  'ECONNRESET',
+  'ENOTFOUND',
+  'EAI_AGAIN',
+];
+const MAX_ATTEMPTS = 30;
+const RETRY_DELAY_MS = 2000;
+
+async function seedAll() {
   const authDb = await connect('AUTH');
-  const employeeDb = await connect('EMPLOYEE');
   try {
-    for (const user of SEED_USERS) {
-      await seedUser(authDb, employeeDb, user);
+    const employeeDb = await connect('EMPLOYEE');
+    try {
+      for (const user of SEED_USERS) {
+        await seedUser(authDb, employeeDb, user);
+      }
+    } finally {
+      await employeeDb.end();
     }
   } finally {
     await authDb.end();
-    await employeeDb.end();
+  }
+}
+
+async function main() {
+  for (let attempt = 1; ; attempt += 1) {
+    try {
+      await seedAll();
+      return;
+    } catch (error) {
+      if (!NOT_READY_CODES.includes(error.code) || attempt === MAX_ATTEMPTS) {
+        throw error;
+      }
+      console.log(`not ready yet (${error.code}), retrying in 2 s...`);
+      await sleep(RETRY_DELAY_MS);
+    }
   }
 }
 
 main().catch((error) => {
   if (error.code === 'ER_NO_SUCH_TABLE') {
-    console.error('The tables do not exist yet. Start the services once so they create them, then run the seed again.');
+    console.error(
+      'The tables do not exist. Start the services so they create them, then run the seed again.',
+    );
   } else {
     console.error(`Seeding failed: ${error.message}`);
   }
