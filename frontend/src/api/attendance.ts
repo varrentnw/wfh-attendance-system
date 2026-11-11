@@ -1,5 +1,18 @@
-import { ApiError, request } from './client';
-import type { AttendanceRecord } from '../types/api';
+import { ApiError, request, requestBlob, toQueryString } from './client';
+import type {
+  AttendanceRecord,
+  AttendanceRecordWithEmployee,
+  PaginatedResult,
+} from '../types/api';
+
+export type AttendanceListQuery = {
+  employeeId?: number;
+  /** Work dates in YYYY-MM-DD format, both inclusive. */
+  from?: string;
+  to?: string;
+  page: number;
+  pageSize: number;
+};
 
 /**
  * Returns today's record, or null when the employee has not checked in yet.
@@ -23,4 +36,20 @@ export function checkIn(photo: File): Promise<AttendanceRecord> {
     method: 'POST',
     body: formData,
   });
+}
+
+export function listAttendanceRecords(
+  query: AttendanceListQuery,
+): Promise<PaginatedResult<AttendanceRecordWithEmployee>> {
+  return request<PaginatedResult<AttendanceRecordWithEmployee>>(
+    `/attendance-records${toQueryString(query)}`,
+  );
+}
+
+/**
+ * Downloads a photo as binary data. An <img src> cannot do this itself,
+ * because the browser does not attach the Authorization header to image requests.
+ */
+export function fetchAttendancePhoto(recordId: number): Promise<Blob> {
+  return requestBlob(`/attendance-records/${recordId}/photo`);
 }

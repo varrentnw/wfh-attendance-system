@@ -1,6 +1,6 @@
-import type { Role } from "../types/api";
-import { useAuth } from "./AuthContext";
-import { Navigate, Outlet } from "react-router";
+import type { Role } from '../types/api';
+import { useAuth } from './AuthContext';
+import { Navigate, Outlet } from 'react-router';
 
 function RequireRole({ role }: { role: Role }) {
   const { session } = useAuth();

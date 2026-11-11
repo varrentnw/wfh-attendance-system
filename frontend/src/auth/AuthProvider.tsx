@@ -40,7 +40,9 @@ function AuthProvider({ children }: AuthProviderProps) {
     setSession(null);
   }
 
-  return <AuthContext value={{ session, login, logout }}>{children}</AuthContext>;
+  return (
+    <AuthContext value={{ session, login, logout }}>{children}</AuthContext>
+  );
 }
 
 export default AuthProvider;

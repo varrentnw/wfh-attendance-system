@@ -6,45 +6,63 @@ import { useAuth } from '../auth/AuthContext';
 import { Navigate } from 'react-router';
 
 function LoginPage() {
-    const [username, setUsername] = useState('');
-    const [password, setPassword] = useState('');
-    const [isSubmitting, setIsSubmitting] = useState(false);
-    const [errorMessages, setErrorMessages] = useState<string[]>([]);
-    const { session, login } = useAuth();
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errorMessages, setErrorMessages] = useState<string[]>([]);
+  const { session, login } = useAuth();
 
-    async function handleLogin(event: SubmitEvent<HTMLFormElement>) {
-        event.preventDefault();
-        setIsSubmitting(true);
-        setErrorMessages([]);
-        try {
-            await login(username, password);
-        } catch (error) {
-            setErrorMessages(toErrorMessages(error));
-        } finally {
-            setIsSubmitting(false);
-        }
+  async function handleLogin(event: SubmitEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setIsSubmitting(true);
+    setErrorMessages([]);
+    try {
+      await login(username, password);
+    } catch (error) {
+      setErrorMessages(toErrorMessages(error));
+    } finally {
+      setIsSubmitting(false);
     }
+  }
 
-    if (session !== null) {
-        return (
-            <Navigate to="/" replace/>
-        )
-    }
-    return (
+  if (session !== null) {
+    return <Navigate to="/" replace />;
+  }
+  return (
+    <main className="login-page">
+      <div className="login-card">
+        <h1>WFH Attendance</h1>
         <form onSubmit={handleLogin}>
+          <div className="field">
             <label htmlFor="username">Username</label>
-            <input id="username" value={username}  autoComplete="username" onChange={(event) => setUsername(event.target.value)} />
-            
-            <label htmlFor="password">Password</label>
-            <input id="password" type="password" autoComplete="current-password" value={password} onChange={(event) => setPassword(event.target.value)} />
+            <input
+              id="username"
+              value={username}
+              autoComplete="username"
+              onChange={(event) => setUsername(event.target.value)}
+            />
+          </div>
 
-            <ErrorMessages messages={errorMessages} />
-           
-           <button type="submit" disabled={isSubmitting}>
+          <div className="field">
+            <label htmlFor="password">Password</label>
+            <input
+              id="password"
+              type="password"
+              autoComplete="current-password"
+              value={password}
+              onChange={(event) => setPassword(event.target.value)}
+            />
+          </div>
+
+          <ErrorMessages messages={errorMessages} />
+
+          <button type="submit" disabled={isSubmitting}>
             {isSubmitting ? 'Logging in...' : 'Login'}
-           </button>
+          </button>
         </form>
-    );
+      </div>
+    </main>
+  );
 }
 
 export default LoginPage;

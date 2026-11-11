@@ -2,9 +2,12 @@ import { Navigate, Route, Routes } from 'react-router';
 import HomeRedirect from './auth/HomeRedirect';
 import RequireRole from './auth/RequireRole';
 import AppLayout from './components/AppLayout';
+import AttendancePage from './pages/AttendancePage';
 import CheckInPage from './pages/CheckInPage';
+import EditEmployeePage from './pages/EditEmployeePage';
 import EmployeesPage from './pages/EmployeesPage';
 import LoginPage from './pages/LoginPage';
+import NewEmployeePage from './pages/NewEmployeePage';
 
 function App() {
   return (
@@ -26,6 +29,12 @@ function App() {
       <Route element={<RequireRole role="HRD_ADMIN" />}>
         <Route element={<AppLayout />}>
           <Route path="/employees" element={<EmployeesPage />} />
+          <Route path="/employees/new" element={<NewEmployeePage />} />
+          <Route
+            path="/employees/:employeeId/edit"
+            element={<EditEmployeePage />}
+          />
+          <Route path="/attendance" element={<AttendancePage />} />
         </Route>
       </Route>
 
