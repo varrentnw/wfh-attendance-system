@@ -258,9 +258,11 @@ GET   /attendance-records/:id/photo           HRD_ADMIN
 - **Error details.** Unexpected errors are logged on the server and reported to the client only as a generic `500`, so database and internal details never leak.
 - **Development secrets.** The database passwords in `init.sql` are for local development only. Production would use a secrets manager.
 
-## Open items
+## Frontend notes
 
-- Browsers do not send the `Authorization` header for a plain `<img src="...">`, so the photo endpoint needs a decision on how the frontend loads images. To be settled when building the frontend.
+- **Protected photos.** Browsers do not send the `Authorization` header for a plain `<img src="...">`. The frontend therefore downloads a photo with `fetch` (which carries the token), keeps the bytes in memory as a blob, and displays it through a temporary object URL that is released when the photo is closed. The alternative, an `httpOnly` cookie that the browser attaches by itself, is listed under future improvements.
+- **Session storage.** The token, employee ID, and role are kept in `localStorage`, so a refresh does not log the user out. The trade-off is that injected scripts could read the token. The stored role only decides which screens are shown; the gateway checks the signed token on every request.
+- **Expired tokens.** When a request that carried a token is answered with `401`, the frontend ends the session and returns to the login page.
 
 ## Assumptions
 
@@ -276,6 +278,7 @@ GET   /attendance-records/:id/photo           HRD_ADMIN
 
 - Filtering attendance by department. The gateway would ask the employee service for the IDs of employees in that department, then query the attendance service for those IDs.
 - A `departments` table, so free-text values such as "IT" and "I.T." cannot both exist.
+- An `httpOnly`, `SameSite` cookie for the token instead of `localStorage`, with CSRF protection, so scripts cannot read it and `<img>` tags can load photos directly.
 - Object storage for photos (for example S3), with the browser uploading directly through a pre-signed URL, so files no longer pass through the gateway and TCP.
 - Reviewed migrations instead of `synchronize`, and two MySQL users per service: a restricted one for the running app and a privileged one used only for migrations.
 - A periodic cleanup job for the rare inconsistencies compensation cannot cover, such as a crash between saving an attendance record and writing its photo.
