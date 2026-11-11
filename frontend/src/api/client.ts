@@ -28,7 +28,10 @@ type RequestOptions = {
   body?: unknown;
 };
 
-export async function request<T>(path: string, options: RequestOptions = {}): Promise<T> {
+export async function request<T>(
+  path: string,
+  options: RequestOptions = {},
+): Promise<T> {
   const headers: Record<string, string> = {};
 
   const token = getToken();
@@ -66,10 +69,14 @@ export async function request<T>(path: string, options: RequestOptions = {}): Pr
 async function readErrorMessages(response: Response): Promise<string[]> {
   try {
     const errorBody = (await response.json()) as ApiErrorBody;
-    return Array.isArray(errorBody.message) ? errorBody.message : [errorBody.message];
+    return Array.isArray(errorBody.message)
+      ? errorBody.message
+      : [errorBody.message];
   } catch {
     // Not every error response is our JSON shape (for example a proxy's HTML error page).
-    return [response.statusText || `Request failed with status ${response.status}`];
+    return [
+      response.statusText || `Request failed with status ${response.status}`,
+    ];
   }
 }
 

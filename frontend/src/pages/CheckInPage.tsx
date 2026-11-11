@@ -52,7 +52,9 @@ function CheckInPage() {
     const photo = event.target.files?.[0] ?? null;
     if (photo !== null && photo.size > MAX_PHOTO_BYTES) {
       setSelectedPhoto(null);
-      setErrorMessages(['The photo is larger than 5 MB. Please choose a smaller one.']);
+      setErrorMessages([
+        'The photo is larger than 5 MB. Please choose a smaller one.',
+      ]);
       return;
     }
     setSelectedPhoto(photo);
@@ -96,7 +98,10 @@ function CheckInPage() {
   return (
     <section>
       <h1>Check-in</h1>
-      <p>You have not checked in today. Upload a photo of yourself working from home.</p>
+      <p>
+        You have not checked in today. Upload a photo of yourself working from
+        home.
+      </p>
 
       <form onSubmit={handleCheckIn}>
         <label htmlFor="photo">Photo (JPEG or PNG, up to 5 MB)</label>
@@ -109,7 +114,11 @@ function CheckInPage() {
         />
 
         {previewUrl !== null && (
-          <img className="photo-preview" src={previewUrl} alt="Preview of the selected photo" />
+          <img
+            className="photo-preview"
+            src={previewUrl}
+            alt="Preview of the selected photo"
+          />
         )}
 
         <ErrorMessages messages={errorMessages} />
