@@ -27,6 +27,7 @@ export class Employee {
   position: string;
 
   @Column({
+    name: 'employment_status',
     type: 'enum',
     enum: EmploymentStatus,
     default: EmploymentStatus.ACTIVE,
