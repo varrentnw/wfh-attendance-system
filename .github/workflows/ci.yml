@@ -1,0 +1,116 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  backend:
+    name: Backend (lint, unit tests, build)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: backend/package-lock.json
+      - run: npm ci
+      - run: npm run lint
+      - run: npm test
+      - name: Build the gateway and the three services
+        run: |
+          for app in auth employee attendance gateway; do
+            npx nest build "$app"
+          done
+
+  frontend:
+    name: Frontend (lint, build)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run build
+
+  e2e:
+    name: Browser tests against the whole system
+    runs-on: ubuntu-latest
+    services:
+      mysql:
+        image: mysql:8.4
+        env:
+          MYSQL_ROOT_PASSWORD: password
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -ppassword"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=24
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Configure
+        run: |
+          cp .env.example .env
+          cp frontend/.env.example frontend/.env
+
+      - name: Create the databases and the per-service users
+        run: mysql -h 127.0.0.1 -uroot -ppassword < docker/mysql/init.sql
+
+      - name: Start the backend
+        working-directory: backend
+        run: |
+          npm ci
+          nohup npm run start:all > ../backend.log 2>&1 &
+          # A service opens its port only after it has connected to MySQL and created its tables.
+          for port in 4001 4002 4003 3000; do
+            timeout 180 bash -c "until (echo > /dev/tcp/localhost/$port) 2>/dev/null; do sleep 1; done"
+          done
+
+      - name: Seed the first accounts
+        working-directory: backend
+        run: npm run seed
+
+      - name: Build and serve the frontend
+        working-directory: frontend
+        run: |
+          npm ci
+          npm run build
+          nohup npx vite preview --port 5173 --strictPort > ../frontend.log 2>&1 &
+          timeout 60 bash -c "until (echo > /dev/tcp/localhost/5173) 2>/dev/null; do sleep 1; done"
+
+      - name: Run the browser tests
+        working-directory: e2e
+        run: |
+          npm ci
+          npx playwright install --with-deps chromium
+          npm test
+
+      - name: Show the backend log
+        if: failure()
+        run: cat backend.log
+
+      - name: Keep the test report
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: e2e/playwright-report
+          retention-days: 7
