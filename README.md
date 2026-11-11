@@ -37,11 +37,34 @@ The backend is split by **data ownership**: each service owns one kind of data a
 
 The full design is in [`docs/design.md`](docs/design.md): schema, the internal contract between the gateway and the services, the HTTP API, the cross-service rules (compensation when creating an employee, fail-closed deactivation, graceful degradation), and security notes.
 
-## Running it locally
+## Running it
+
+There are two ways. Both end with the app at <http://localhost:5173> and the seed accounts below.
+
+### Option A: everything in Docker
+
+**Prerequisite:** Docker with the Compose plugin.
+
+```bash
+git clone https://github.com/varrentnw/wfh-attendance-system.git
+cd wfh-attendance-system
+cp .env.example .env
+docker compose --profile app up --build
+```
+
+This builds and starts MySQL, the three services, the gateway and the frontend, then runs the seed script once. The first build takes a few minutes. The app is ready when the `seed` container has printed the accounts it created.
+
+Only the gateway (3000), the frontend (5173) and MySQL (3306) are published to the host. The three services have no published ports, so nothing outside the Compose network can reach them.
+
+To stop: `docker compose --profile app down`. Add `-v` to also delete the database and the uploaded photos.
+
+### Option B: local development
+
+MySQL runs in Docker, and the backend and frontend run with npm, with reloading on change.
 
 **Prerequisites:** Node.js 22.22 or newer (developed on 26), npm, and Docker with the Compose plugin.
 
-### 1. Configuration and database
+#### 1. Configuration and database
 
 ```bash
 git clone https://github.com/varrentnw/wfh-attendance-system.git
@@ -51,9 +74,9 @@ cp frontend/.env.example frontend/.env
 docker compose up -d
 ```
 
-This starts MySQL 8.4 and, on the first start, creates the three databases and the three MySQL users (`docker/mysql/init.sql`). The values in `.env.example` work as they are for local development.
+Without `--profile app`, Compose starts MySQL only. On the first start it creates the three databases and the three MySQL users (`docker/mysql/init.sql`). The values in `.env.example` work as they are for local development.
 
-### 2. Backend
+#### 2. Backend
 
 ```bash
 cd backend
@@ -61,7 +84,7 @@ npm install
 npm run start:all
 ```
 
-`start:all` runs the gateway and the three services together. Wait until all four report `successfully started`. In development the services create their own tables on first start.
+`start:all` runs the gateway and the three services together. Wait until all four report `successfully started`. In development the services create their own tables on first start. To work on one service with reloading, run it by itself instead: `npx nest start gateway --watch`.
 
 Then, in a second terminal, create the first accounts:
 
@@ -70,7 +93,7 @@ cd backend
 npm run seed
 ```
 
-### 3. Frontend
+#### 3. Frontend
 
 ```bash
 cd frontend
@@ -115,6 +138,7 @@ frontend/                React app
   src/pages/             one component per screen
 e2e/                     browser tests for the whole system (Playwright)
 docker/mysql/init.sql    databases and per-service MySQL users
+docker-compose.yml       MySQL for development, or the whole system with --profile app
 docs/design.md           the design in full
 wfh-attendance/          Bruno collection of API requests
 ```
@@ -140,7 +164,7 @@ wfh-attendance/          Bruno collection of API requests
   ```
 
   Each run creates its own employees (named `E2E …`), so the tests can be repeated on a database that is already in use.
-- **Continuous integration:** on every push and pull request, GitHub Actions lints and builds both halves, runs the unit tests, then starts MySQL and the whole system and runs the browser tests (`.github/workflows/ci.yml`).
+- **Continuous integration:** on every push and pull request, GitHub Actions lints and builds both halves, runs the unit tests, and runs the browser tests twice: against the system started with npm, and against the Docker Compose stack (`.github/workflows/ci.yml`).
 - **API:** the Bruno collection in `wfh-attendance/` holds requests used to test the backend by hand, including failure paths: validation, rejected undeclared fields (mass assignment), duplicate email and username, role checks, compensation when creating an employee (with a fault injected), and fail-closed deactivation and reactivation.
 - **By hand:** two cases need a service to be stopped or broken, so they were tested manually: the attendance list while the employee service is down (records are still shown), and compensation with a fault injected.
 - **Gap:** the services themselves have no unit tests. NestJS 12 packages are ESM-only; the application runs under CommonJS, but Jest could not load NestJS's testing utilities, so the generated Jest scaffolding was removed and the unit tests above run on Vitest. With more time I would add service-level tests with mocked repositories and clients.
@@ -161,6 +185,6 @@ More are listed, with the reasoning, under "Future improvements" in [`docs/desig
 The brief allows AI tools, and I used Claude (Anthropic) throughout.
 
 - **Backend and design:** I used it as a tutor. I learned NestJS, TypeORM and the microservice patterns during this project, wrote the first instance of each kind of component myself, and had repeated boilerplate generated and then reviewed it.
-- **Frontend:** React was new to me. With the same tutoring I wrote the login page, the route guards, the routes and the first components myself. The API client and the auth context were generated and explained to me. Because of the deadline, the remaining screens (check-in, employees, attendance), the stylesheet, the seed script, the automated tests with their CI workflow, and the first draft of this README were generated by Claude. I reviewed and tested them, and those commits are marked as co-authored.
+- **Frontend:** React was new to me. With the same tutoring I wrote the login page, the route guards, the routes and the first components myself. The API client and the auth context were generated and explained to me. Because of the deadline, the remaining screens (check-in, employees, attendance), the stylesheet, the seed script, the automated tests with their CI workflow, the Docker setup, and the first draft of this README were generated by Claude. I reviewed and tested them, and those commits are marked as co-authored.
 
 I can explain the design decisions and the code in this repository, and I am glad to walk through any part of it.

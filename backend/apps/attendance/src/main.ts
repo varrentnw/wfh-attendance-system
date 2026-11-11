@@ -10,7 +10,9 @@ async function bootstrap() {
   app.connectMicroservice<MicroserviceOptions>({
     transport: Transport.TCP,
     options: {
-      host: 'localhost',
+      // Only this machine by default. In a container the service must accept
+      // connections from the other containers, so Compose sets 0.0.0.0.
+      host: config.get<string>('SERVICE_BIND_HOST') ?? 'localhost',
       port: Number(config.getOrThrow<string>('ATTENDANCE_SERVICE_PORT')),
     },
   });

@@ -1,6 +1,32 @@
+# Two ways to use this file:
+#
+#   docker compose up -d                        MySQL only, for local development
+#   docker compose --profile app up --build     the whole system, in containers
+
+# Settings shared by the gateway and the three services.
+x-backend: &backend
+  build: ./backend
+  image: wfh-attendance-backend
+  profiles: [app]
+  env_file: .env
+  environment: &backend-environment
+    # Inside the Compose network, containers reach each other by service name.
+    DB_HOST: mysql
+    DB_PORT: 3306
+    AUTH_SERVICE_HOST: auth
+    EMPLOYEE_SERVICE_HOST: employee
+    ATTENDANCE_SERVICE_HOST: attendance
+    SERVICE_BIND_HOST: 0.0.0.0
+  depends_on:
+    mysql:
+      condition: service_healthy
+  restart: unless-stopped
+
 services:
   mysql:
     image: mysql:8.4
+    # The design stores every time in UTC. The image already runs in UTC; this makes it explicit.
+    command: ["--default-time-zone=+00:00"]
     environment:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?MYSQL_ROOT_PASSWORD is not set in .env}
     ports:
@@ -8,6 +34,61 @@ services:
     volumes:
       - mysql_data:/var/lib/mysql
       - ./docker/mysql/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
-  
+    healthcheck:
+      # Over TCP on purpose: while the image runs init.sql, MySQL listens on a socket only,
+      # so this check passes only once the databases and users exist.
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 --silent"]
+      interval: 5s
+      timeout: 5s
+      retries: 24
+
+  # The three services publish no ports: only the gateway can reach them.
+  auth:
+    <<: *backend
+    command: ["node", "dist/apps/auth/main"]
+
+  employee:
+    <<: *backend
+    command: ["node", "dist/apps/employee/main"]
+
+  attendance:
+    <<: *backend
+    command: ["node", "dist/apps/attendance/main"]
+    volumes:
+      - attendance_uploads:/app/uploads
+
+  gateway:
+    <<: *backend
+    command: ["node", "dist/apps/gateway/main"]
+    ports:
+      - "3000:3000"
+    depends_on:
+      - auth
+      - employee
+      - attendance
+
+  # Runs once, creates the first accounts, and exits. It waits for the services to create their tables.
+  seed:
+    <<: *backend
+    command: ["node", "scripts/seed.js"]
+    depends_on:
+      - auth
+      - employee
+    restart: "no"
+
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        VITE_API_URL: http://localhost:3000
+    image: wfh-attendance-frontend
+    profiles: [app]
+    ports:
+      - "5173:80"
+    depends_on:
+      - gateway
+    restart: unless-stopped
+
 volumes:
   mysql_data:
+  attendance_uploads:
