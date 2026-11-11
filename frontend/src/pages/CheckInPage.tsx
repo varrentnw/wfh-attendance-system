@@ -103,15 +103,17 @@ function CheckInPage() {
         home.
       </p>
 
-      <form onSubmit={handleCheckIn}>
-        <label htmlFor="photo">Photo (JPEG or PNG, up to 5 MB)</label>
-        <input
-          id="photo"
-          type="file"
-          accept="image/jpeg,image/png"
-          onChange={handlePhotoChange}
-          disabled={isSubmitting}
-        />
+      <form className="form-card" onSubmit={handleCheckIn}>
+        <div className="field">
+          <label htmlFor="photo">Photo (JPEG or PNG, up to 5 MB)</label>
+          <input
+            id="photo"
+            type="file"
+            accept="image/jpeg,image/png"
+            onChange={handlePhotoChange}
+            disabled={isSubmitting}
+          />
+        </div>
 
         {previewUrl !== null && (
           <img

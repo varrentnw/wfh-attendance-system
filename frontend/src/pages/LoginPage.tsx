@@ -29,30 +29,39 @@ function LoginPage() {
     return <Navigate to="/" replace />;
   }
   return (
-    <form onSubmit={handleLogin}>
-      <label htmlFor="username">Username</label>
-      <input
-        id="username"
-        value={username}
-        autoComplete="username"
-        onChange={(event) => setUsername(event.target.value)}
-      />
+    <main className="login-page">
+      <div className="login-card">
+        <h1>WFH Attendance</h1>
+        <form onSubmit={handleLogin}>
+          <div className="field">
+            <label htmlFor="username">Username</label>
+            <input
+              id="username"
+              value={username}
+              autoComplete="username"
+              onChange={(event) => setUsername(event.target.value)}
+            />
+          </div>
 
-      <label htmlFor="password">Password</label>
-      <input
-        id="password"
-        type="password"
-        autoComplete="current-password"
-        value={password}
-        onChange={(event) => setPassword(event.target.value)}
-      />
+          <div className="field">
+            <label htmlFor="password">Password</label>
+            <input
+              id="password"
+              type="password"
+              autoComplete="current-password"
+              value={password}
+              onChange={(event) => setPassword(event.target.value)}
+            />
+          </div>
 
-      <ErrorMessages messages={errorMessages} />
+          <ErrorMessages messages={errorMessages} />
 
-      <button type="submit" disabled={isSubmitting}>
-        {isSubmitting ? 'Logging in...' : 'Login'}
-      </button>
-    </form>
+          <button type="submit" disabled={isSubmitting}>
+            {isSubmitting ? 'Logging in...' : 'Login'}
+          </button>
+        </form>
+      </div>
+    </main>
   );
 }
 

@@ -1,0 +1,413 @@
+/* One small stylesheet for the whole app: plain CSS, no framework. */
+
+:root {
+  --color-text: #1f2933;
+  --color-muted: #616e7c;
+  --color-border: #d5dbe1;
+  --color-surface: #ffffff;
+  --color-page: #f3f5f7;
+  --color-accent: #0b6e69;
+  --color-accent-dark: #095651;
+  --color-danger-text: #9b1c1c;
+  --color-danger-bg: #fdecec;
+  --color-success-text: #0f5132;
+  --color-success-bg: #e3f4ea;
+  --radius: 6px;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--color-page);
+  color: var(--color-text);
+  font-family:
+    system-ui,
+    -apple-system,
+    'Segoe UI',
+    Roboto,
+    sans-serif;
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+h1 {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+h2 {
+  margin: 1.25rem 0 0.25rem;
+  font-size: 1.1rem;
+}
+
+a {
+  color: var(--color-accent);
+}
+
+/* ---------- Layout ---------- */
+
+.app-header {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  padding: 0.75rem 1.5rem;
+  background: var(--color-surface);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.app-title {
+  font-size: 1.05rem;
+}
+
+.app-nav {
+  display: flex;
+  flex: 1;
+  gap: 0.25rem;
+}
+
+.app-nav a {
+  padding: 0.35rem 0.75rem;
+  border-radius: var(--radius);
+  color: var(--color-muted);
+  text-decoration: none;
+}
+
+.app-nav a:hover {
+  color: var(--color-text);
+}
+
+/* React Router adds the "active" class to the link of the current page. */
+.app-nav a.active {
+  background: var(--color-page);
+  color: var(--color-text);
+  font-weight: 600;
+}
+
+.app-main {
+  max-width: 64rem;
+  margin: 0 auto;
+  padding: 1.5rem;
+}
+
+.page-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+/* ---------- Forms ---------- */
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  margin-bottom: 0.9rem;
+}
+
+label {
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+input,
+select {
+  padding: 0.5rem 0.6rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  background: var(--color-surface);
+  color: inherit;
+  font: inherit;
+}
+
+input:focus-visible,
+select:focus-visible,
+button:focus-visible,
+a:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+.hint {
+  color: var(--color-muted);
+}
+
+.form-card {
+  max-width: 32rem;
+  margin-top: 1rem;
+  padding: 1.25rem;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+}
+
+.form-actions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 0.75rem 1rem;
+  margin-bottom: 1rem;
+  padding: 1rem;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+}
+
+.filters .field {
+  margin-bottom: 0;
+}
+
+.filter-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+/* ---------- Buttons ---------- */
+
+button,
+.button {
+  display: inline-block;
+  padding: 0.5rem 0.9rem;
+  border: 1px solid var(--color-accent);
+  border-radius: var(--radius);
+  background: var(--color-accent);
+  color: #ffffff;
+  font: inherit;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+button:hover,
+.button:hover {
+  background: var(--color-accent-dark);
+}
+
+button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.button-secondary {
+  border-color: var(--color-border);
+  background: var(--color-surface);
+  color: var(--color-text);
+}
+
+.button-secondary:hover {
+  background: var(--color-page);
+}
+
+.button-link {
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--color-accent);
+  font-weight: 400;
+  text-decoration: underline;
+}
+
+.button-link:hover {
+  background: none;
+  color: var(--color-accent-dark);
+}
+
+/* ---------- Tables ---------- */
+
+.table-wrapper {
+  overflow-x: auto;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+}
+
+/* The previous rows stay visible, dimmed, while the next page loads. */
+.table-wrapper.is-loading {
+  opacity: 0.55;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th,
+td {
+  padding: 0.6rem 0.9rem;
+  border-bottom: 1px solid var(--color-border);
+  text-align: left;
+  white-space: nowrap;
+}
+
+th {
+  color: var(--color-muted);
+  font-size: 0.85rem;
+}
+
+tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.empty-row,
+.muted {
+  color: var(--color-muted);
+}
+
+.empty-row {
+  padding: 1.5rem;
+  text-align: center;
+}
+
+.pagination {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+  margin-top: 0.75rem;
+  color: var(--color-muted);
+  font-size: 0.9rem;
+}
+
+.pagination span:first-child {
+  margin-right: auto;
+}
+
+/* ---------- Messages and badges ---------- */
+
+ul[role='alert'] {
+  margin: 0.75rem 0;
+  padding: 0.6rem 0.9rem 0.6rem 2rem;
+  border: 1px solid #f3c2c2;
+  border-radius: var(--radius);
+  background: var(--color-danger-bg);
+  color: var(--color-danger-text);
+}
+
+.notice-success {
+  padding: 0.75rem 1rem;
+  border: 1px solid #b7e0c7;
+  border-radius: var(--radius);
+  background: var(--color-success-bg);
+  color: var(--color-success-text);
+  font-weight: 600;
+}
+
+.badge {
+  display: inline-block;
+  padding: 0.1rem 0.55rem;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.badge-active {
+  background: var(--color-success-bg);
+  color: var(--color-success-text);
+}
+
+.badge-inactive {
+  background: #e9ecef;
+  color: var(--color-muted);
+}
+
+/* ---------- Login ---------- */
+
+.login-page {
+  display: flex;
+  min-height: 100vh;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+}
+
+.login-card {
+  width: 100%;
+  max-width: 22rem;
+  padding: 1.5rem;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+}
+
+.login-card h1 {
+  margin-bottom: 1rem;
+}
+
+.login-card button {
+  width: 100%;
+  margin-top: 0.25rem;
+}
+
+/* ---------- Photos ---------- */
+
+.photo-preview {
+  display: block;
+  max-width: 100%;
+  max-height: 18rem;
+  margin-bottom: 0.9rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+}
+
+.dialog-backdrop {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  background: rgb(15 23 32 / 60%);
+}
+
+.dialog {
+  max-width: min(48rem, 100%);
+  max-height: 100%;
+  overflow: auto;
+  padding: 1rem 1.25rem 1.25rem;
+  background: var(--color-surface);
+  border-radius: var(--radius);
+}
+
+.dialog-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.75rem;
+}
+
+.dialog-heading h2 {
+  margin: 0;
+}
+
+.dialog-photo {
+  display: block;
+  max-width: 100%;
+  max-height: 70vh;
+  margin: 0 auto;
+}
+
+/* ---------- Utilities ---------- */
+
+/* Hidden on screen, still read by screen readers. */
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
