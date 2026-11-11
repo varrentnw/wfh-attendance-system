@@ -100,7 +100,9 @@ jobs:
         working-directory: e2e
         run: |
           npm ci
-          npx playwright install --with-deps chromium
+          # No --with-deps: the runner image already has the system libraries, and installing
+          # extra packages made the job depend on the Ubuntu package mirrors being reachable.
+          npx playwright install chromium
           npm test
 
       - name: Show the backend log
@@ -142,7 +144,9 @@ jobs:
         working-directory: e2e
         run: |
           npm ci
-          npx playwright install --with-deps chromium
+          # No --with-deps: the runner image already has the system libraries, and installing
+          # extra packages made the job depend on the Ubuntu package mirrors being reachable.
+          npx playwright install chromium
           npm test
 
       - name: Show the container logs
