@@ -1,7 +1,7 @@
 import ErrorMessages from '../components/ErrorMessages';
 import { useState } from 'react';
 import type { SubmitEvent } from 'react';
-import { ApiError } from '../api/client';
+import { toErrorMessages } from '../api/client';
 import { useAuth } from '../auth/AuthContext';
 import { Navigate } from 'react-router';
 
@@ -19,11 +19,7 @@ function LoginPage() {
         try {
             await login(username, password);
         } catch (error) {
-            if (error instanceof ApiError) {
-                setErrorMessages(error.messages);
-            } else {
-                setErrorMessages(['Cannot reach the server. Please try again.']);
-            }
+            setErrorMessages(toErrorMessages(error));
         } finally {
             setIsSubmitting(false);
         }
