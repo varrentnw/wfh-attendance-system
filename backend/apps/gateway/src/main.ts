@@ -14,9 +14,10 @@ async function bootstrap() {
     }),
   );
   app.useGlobalFilters(new RpcToHttpExceptionFilter());
+  const config = app.get(ConfigService);
   app.enableCors({
-    origin: app.get(ConfigService).getOrThrow<string>('CORS_ORIGIN'),
+    origin: config.getOrThrow<string>('CORS_ORIGIN'),
   });
-  await app.listen(process.env.port ?? 3000);
+  await app.listen(Number(config.get<string>('GATEWAY_PORT') ?? 3000));
 }
-bootstrap();
+void bootstrap();
