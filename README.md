@@ -7,6 +7,16 @@ A web application for recording work-from-home attendance, built for the Dexa Gr
 
 **Stack:** React 19 + TypeScript (Vite) · NestJS 12 microservices over TCP · MySQL 8.4 · TypeORM
 
+## Screenshots
+
+| Employee check-in | HRD: employees |
+|---|---|
+| ![Check-in page with a photo selected](docs/screenshots/check-in.png) | ![Employee list with filters](docs/screenshots/employees.png) |
+
+| HRD: attendance | HRD: attendance photo |
+|---|---|
+| ![Attendance list](docs/screenshots/attendance.png) | ![Photo of one attendance record](docs/screenshots/attendance-photo.png) |
+
 ## Architecture
 
 ```
@@ -118,9 +128,10 @@ wfh-attendance/          Bruno collection of API requests
 
 ## Testing
 
-- **API:** the Bruno collection in `wfh-attendance/` holds the requests used to test the backend by hand, including failure paths: validation, rejected undeclared fields (mass assignment), duplicate email and username, role checks, compensation when creating an employee (with a fault injected), fail-closed deactivation and reactivation, graceful degradation, and file checks.
+- **Unit tests** (`cd backend && npm test`): the two pieces of logic that need no database or framework. `toWorkDate` decides which day a check-in counts for, and is tested around WIB midnight and a year boundary. `detectImageType` identifies a photo by its first bytes, and is tested with valid, truncated and non-image content.
+- **API:** the Bruno collection in `wfh-attendance/` holds requests used to test the backend by hand, including failure paths: validation, rejected undeclared fields (mass assignment), duplicate email and username, role checks, compensation when creating an employee (with a fault injected), and fail-closed deactivation and reactivation.
 - **Frontend:** every screen was exercised in a browser against the running backend: login and role-based routing, check-in with its error cases, employee search, creation, editing and deactivation, pagination, the attendance list with photos, an invalid token, and the attendance list while the employee service is stopped.
-- **Gap:** there are no automated tests in the repository. NestJS 12 packages are ESM-only; the application runs under CommonJS, but Jest fails to load them. With more time I would move the backend to ESM (or to a test runner with native ESM support) and add unit tests for the services and end-to-end tests for the API.
+- **Gap:** the services themselves have no unit tests. NestJS 12 packages are ESM-only; the application runs under CommonJS, but Jest could not load NestJS's testing utilities, so the generated Jest scaffolding was removed and the unit tests above run on Vitest. With more time I would add service-level tests with mocked repositories and clients.
 
 ## Known limitations
 
