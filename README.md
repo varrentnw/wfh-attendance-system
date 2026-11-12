@@ -145,7 +145,7 @@ wfh-attendance/          Bruno collection of API requests
 
 ## Assumptions
 
-- "Today" is defined by WIB (Asia/Jakarta), the company's headquarters time zone. The server derives the work date; the browser only displays times in the viewer's own time zone.
+- "Today" is defined by WIB (Asia/Jakarta). The server derives the work date; the browser only displays times in the viewer's own time zone.
 - One check-in per employee per day. The brief does not ask for check-out.
 - HRD admins are employees too, but their accounts are for administration and do not check in.
 - Employees see only today's status, not their history. The brief does not ask for history.
