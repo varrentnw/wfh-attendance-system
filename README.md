@@ -153,8 +153,14 @@ wfh-attendance/          Bruno collection of API requests
 
 ## Testing
 
-- **Unit tests** (`cd backend && npm test`): the two pieces of logic that need no database or framework. `toWorkDate` decides which day a check-in counts for, and is tested around WIB midnight and a year boundary. `detectImageType` identifies a photo by its first bytes, and is tested with valid, truncated and non-image content.
-- **Browser tests** (`e2e/`, 26 tests): a real browser drives the frontend against the running gateway, services and MySQL. They cover login and role-based access, the whole check-in flow with its error cases (oversized file, content that is not an image, a second check-in on the same day), employee creation with validation and conflicts, search, pagination, editing, deactivation and reactivation of a login, the attendance list with its filters, and photos loaded with the token. With the system running and seeded:
+- **Unit tests** (12 tests): the two pieces of logic that need no database or framework. `toWorkDate` decides which day a check-in counts for, and is tested around WIB midnight and a year boundary. `detectImageType` identifies a photo by its first bytes, and is tested with valid, truncated and non-image content. They need the backend's dependencies on your machine, even if you run the app with Docker:
+
+  ```bash
+  cd backend
+  npm install
+  npm test
+  ```
+- **Browser tests** (`e2e/`, 26 tests): a real browser drives the frontend against the running gateway, services and MySQL. They cover login and role-based access, the whole check-in flow with its error cases (oversized file, content that is not an image, a second check-in on the same day), employee creation with validation and conflicts, search, pagination, editing, deactivation and reactivation of a login, the attendance list with its filters, and photos loaded with the token. With the system running and seeded (either option above):
 
   ```bash
   cd e2e
